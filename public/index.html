@@ -1,0 +1,49 @@
+<script>
+  async function checkGrammar() {
+    const text = document.getElementById("textInput").value.trim();
+    if (!text) return alert("Please enter text!");
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "<p>Checking...</p>";
+
+    try {
+      const response = await fetch("/api/check-grammar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await response.json();
+
+      if (!data.success) {
+        resultDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+        return;
+      }
+
+      // Display results
+      let html = `
+        <h3>Original Text:</h3>
+        <p>${data.original}</p>
+        <h3>Errors Found:</h3>
+      `;
+
+      if (data.matches.length === 0) {
+        html += `<p>No grammar errors detected! 🎉</p>`;
+      } else {
+        data.matches.forEach((error) => {
+          html += `
+            <div class="error-item">
+              <p><strong>Error:</strong> ${error.message}</p>
+              <p><strong>Context:</strong> "${error.context.text}"</p>
+              <p><strong>Suggested Correction:</strong> ${error.replacements?.[0]?.value || 'None'}</p>
+              <hr>
+            </div>
+          `;
+        });
+      }
+
+      resultDiv.innerHTML = html;
+    } catch (error) {
+      resultDiv.innerHTML = `<p class="error">Failed to check grammar. Try again later.</p>`;
+    }
+  }
+</script>
