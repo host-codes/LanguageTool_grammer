@@ -29,6 +29,15 @@
     .error { color: red; }
     .correction { color: green; }
     #result { margin-top: 20px; }
+    .incorrect { color: #d32f2f; text-decoration: line-through; }
+.corrected { color: #388e3c; font-weight: bold; }
+.correct { color: #388e3c; }
+.correction { 
+  background: #f5f5f5; 
+  padding: 10px; 
+  margin: 10px 0;
+  border-left: 3px solid #ffa000;
+}
   </style>
 </head>
 <body>
@@ -37,52 +46,41 @@
   <button onclick="checkGrammar()">Check Grammar</button>
   <div id="result"></div>
 
-  <script>
-    // JavaScript Embedded
-    async function checkGrammar() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) return alert("Please enter text!");
+ <script>
+  async function checkGrammar() {
+    const text = document.getElementById("textInput").value.trim();
+    if (!text) return alert("Please enter text!");
 
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "<p>Checking grammar...</p>";
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "<p>Analyzing...</p>";
 
-      try {
-        const response = await fetch("/api/check-grammar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text })
-        });
-        
-        const data = await response.json();
-        displayResults(data);
-        
-      } catch (error) {
-        resultDiv.innerHTML = `<p class="error">Failed to check grammar. Try again.</p>`;
-      }
-    }
-
-    function displayResults(data) {
-      const resultDiv = document.getElementById("result");
+    try {
+      const response = await fetch("/api/check-grammar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      const data = await response.json();
       
-      if (data.error) {
-        resultDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
-        return;
-      }
-
+      // Display human-like analysis
       let html = `
-        <h3>Original Text:</h3>
+        <h3>Original:</h3>
         <p>${data.original}</p>
-        <h3>Results:</h3>
+        <h3>Improved Version:</h3>
+        <p class="corrected">${data.improvedText}</p>
+        <h3>Issues Found:</h3>
       `;
 
       if (data.corrections.length === 0) {
-        html += `<p>No grammar errors found! ✅</p>`;
+        html += `<p>No errors found. Perfect! ✨</p>`;
       } else {
-        data.corrections.forEach(error => {
+        data.corrections.forEach(c => {
           html += `
             <div class="correction">
-              <p><strong>Error:</strong> ${error.message}</p>
-              <p><strong>Suggested fix:</strong> ${error.replacements?.[0]?.value || 'None'}</p>
+              <p><strong>${c.type.toUpperCase()}</strong>: ${c.issue}</p>
+              <p><span class="incorrect">✖ ${c.incorrect}</span> 
+                 → <span class="correct">✔ ${c.correct}</span></p>
+              <p><em>Reason:</em> ${c.explanation}</p>
               <hr>
             </div>
           `;
@@ -90,7 +88,10 @@
       }
 
       resultDiv.innerHTML = html;
+    } catch (error) {
+      resultDiv.innerHTML = `<p class="error">Failed to analyze. Try again.</p>`;
     }
-  </script>
+  }
+</script>
 </body>
 </html>
