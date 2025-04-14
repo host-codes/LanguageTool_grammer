@@ -568,39 +568,35 @@ if (localStorage.getItem('theme') === 'dark') {
     }
 
     // Grammar Check Function
-    async function checkGrammar() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) {
-        showMessage("Please enter some text to check", 'error');
-        return;
-      }
-
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = `
-        <div class="status-message">
-          <span class="loading"></span> Analyzing your text...
-        </div>
-      `;
-
-      try {
-        const response = await fetch("/api/check-grammar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text })
-        });
-        
-        if (!response.ok) {
-          throw new Error('Server responded with error');
-        }
-        
-        const data = await response.json();
-        displayResults(data);
-        
-      } catch (error) {
-        console.error("Error:", error);
-        showMessage("Failed to analyze text. Please try again later.", 'error');
-      }
+async function checkGrammar() {
+  try {
+    const text = document.getElementById("textInput").value.trim();
+    if (!text) {
+      showMessage("Please enter some text to check", 'error');
+      return;
     }
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = `<div class="status-message"><span class="loading"></span> Analyzing...</div>`;
+
+    const response = await fetch("/api/check-grammar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    if (!data.corrections) data.corrections = []; // Ensure array exists
+    
+    displayResults(data);
+    
+  } catch (error) {
+    console.error("Grammar check failed:", error);
+    showMessage("Analysis failed. Please check your text and try again.", 'error');
+  }
+}
 
     // Display Results Function
  function displayResults(data) {
@@ -627,19 +623,21 @@ if (localStorage.getItem('theme') === 'dark') {
       };
       
       html += `
-        <div class="error-item" data-severity="${correction.severity || 2}">
-          <div class="error-header">
-            <span class="error-type">${rule.title}</span>
-            <button class="explain-btn" onclick="toggleExplanation('explanation-${index}')">
-              Why is this wrong?
-            </button>
-          </div>
-          
-          <div class="error-correction">
-            <span class="incorrect">✖ ${correction.incorrect}</span>
-            <span>→</span>
-            <span class="correct">✔ ${correction.correct}</span>
-          </div>
+  <div class="error-item" data-severity="${correction.severity || 2}">
+    <div class="error-header">
+      <span class="error-type">${rule.title}</span>
+      <button class="explain-btn" onclick="toggleExplanation('explanation-${index}')">
+        Why is this wrong?
+      </button>
+    </div>
+    
+    <div class="error-correction">
+      <span class="incorrect">✖ ${correction.incorrect || 'Error'}</span>
+      <span>→</span>
+      <span class="correct">✔ ${correction.correct || 'Correction'}</span>
+    </div>
+    
+    ${correction.message ? `<p class="error-reason">${correction.message}</p>` : ''}
           
           <div class="explanation-box" 
          id="explanation-${index}"
@@ -670,17 +668,30 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 // Helper functions
+
+
 function highlightText(text, corrections) {
+  if (!corrections || !Array.isArray(corrections)) return text;
+  
   let result = text;
   corrections.forEach(c => {
-    const severity = c.severity || 2;
-    result = result.replace(
-      c.context.text, 
-      `<span class="highlighted-sentence highlight-${severity}">${c.context.text}</span>`
-    );
+    try {
+      const errorText = c.context?.text || c.incorrect || '';
+      const severity = c.severity || 2;
+      
+      if (errorText && result.includes(errorText)) {
+        result = result.replace(
+          errorText, 
+          `<span class="highlighted-sentence highlight-${severity}">${errorText}</span>`
+        );
+      }
+    } catch (e) {
+      console.warn("Error highlighting text:", e);
+    }
   });
   return result;
 }
+
 
 function toggleExplanation(id) {
   const box = document.getElementById(id);
