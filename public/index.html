@@ -41,11 +41,29 @@
       padding: 2rem;
     }
 
-    body.dark-mode {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
+  /* Add this to your existing style tag */
+body.dark-mode .explain-btn {
+  color: var(--primary-dark);
+}
 
+body.dark-mode .explanation-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-left-color: var(--primary-dark);
+}
+
+body.dark-mode .error-item[data-severity="1"] {
+  background: rgba(255, 193, 7, 0.08);
+}
+body.dark-mode .error-item[data-severity="2"] {
+  background: rgba(255, 152, 0, 0.08);
+}
+body.dark-mode .error-item[data-severity="3"] {
+  background: rgba(244, 67, 54, 0.08);
+}
+
+body.dark-mode .examples {
+  color: #e0e0e0;
+}
     .container {
       max-width: 800px;
       margin: 0 auto;
@@ -358,7 +376,71 @@
       color: var(--success-dark);
       border-left-color: var(--success-dark);
     }
+/* === New Styles for Interactive Features === */
 
+/* Error Severity Highlighting */
+.error-item[data-severity="1"] {
+  border-left: 4px solid #FFC107;
+  background: rgba(255, 193, 7, 0.05);
+}
+.error-item[data-severity="2"] {
+  border-left: 4px solid #FF9800;
+  background: rgba(255, 152, 0, 0.05);
+}
+.error-item[data-severity="3"] {
+  border-left: 4px solid #F44336;
+  background: rgba(244, 67, 54, 0.05);
+}
+
+/* Explanation Button */
+.explain-btn {
+  background: none;
+  border: none;
+  color: var(--primary-light);
+  cursor: pointer;
+  font-size: 0.9em;
+  text-decoration: underline;
+  margin-left: 10px;
+  padding: 2px 5px;
+  transition: all 0.2s;
+}
+.explain-btn:hover {
+  opacity: 0.8;
+}
+
+/* Explanation Box */
+.explanation-box {
+  display: none;
+  padding: 12px;
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-light);
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sentence Highlighting */
+.highlighted-sentence {
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.highlight-1 { background-color: #FFF3CD; }
+.highlight-2 { background-color: #FFE082; }
+.highlight-3 { background-color: #FFAB91; }
+
+/* Dark Mode Adjustments */
+body.dark-mode .explanation-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: var(--primary-dark);
+}
+body.dark-mode .highlight-1 { background-color: #332100; }
+body.dark-mode .highlight-2 { background-color: #664200; }
+body.dark-mode .highlight-3 { background-color: #661900; }
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       body {
@@ -393,15 +475,61 @@
 
     <div class="results" id="result"></div>
   </div>
-
+<script>
+  // Grammar Rules Database
+  const grammarRules = {
+    'subject-verb': {
+      title: "Subject-Verb Agreement",
+      explanation: "Singular subjects need singular verbs; plural subjects need plural verbs.",
+      examples: [
+        "✓ The dog <u>barks</u> (singular)",
+        "✗ The dog <u>bark</u>",
+        "✓ The dogs <u>bark</u> (plural)"
+      ]
+    },
+    'article-missing': {
+      title: "Missing Article",
+      explanation: "Use 'a/an' for general things, 'the' for specific things.",
+      examples: [
+        "✓ I saw <u>a</u> cat (general)",
+        "✓ I saw <u>the</u> cat we adopted (specific)"
+      ]
+    }
+    // Add more rules as needed
+  };
+</script>
   <script>
     // Theme Toggle Functionality
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      document.getElementById('theme-text').textContent = isDark ? 'Light Mode' : 'Dark Mode';
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
+// Replace your existing toggleTheme() function with this:
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle('dark-mode');
+  
+  const isDark = body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  updateThemeButton(isDark);
+}
+
+// Add this new helper function:
+function updateThemeButton(isDark) {
+  const themeText = document.getElementById('theme-text');
+  const toggleInput = document.querySelector('.toggle-switch input');
+  
+  themeText.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  toggleInput.checked = isDark;
+  
+  // Update all dynamic elements
+  document.querySelectorAll('.explanation-box').forEach(box => {
+    box.style.backgroundColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)';
+  });
+}
+
+// Modify your theme initialization:
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark-mode');
+  updateThemeButton(true);
+}
+
 
     // Load saved theme preference
     if (localStorage.getItem('theme') === 'dark') {
@@ -446,59 +574,89 @@
     }
 
     // Display Results Function
-    function displayResults(data) {
-      const resultDiv = document.getElementById("result");
+ function displayResults(data) {
+   const isDark = document.body.classList.contains('dark-mode');
+  const resultDiv = document.getElementById("result");
+  
+  let html = `
+    <div class="results-card">
+      <h3 class="section-title">Original Text</h3>
+      <div class="text-display" id="original-text">${highlightText(data.original, data.corrections)}</div>
       
-      if (data.error) {
-        showMessage(data.error, 'error');
-        return;
-      }
+      <h3 class="section-title">Corrected Text</h3>
+      <div class="text-display corrected">${data.improvedText}</div>
+  `;
 
-      let html = `
-        <div class="results-card">
-          <h3 class="section-title">Original Text</h3>
-          <div class="text-display">${data.original}</div>
-          
-          <h3 class="section-title">Corrected Text</h3>
-          <div class="text-display corrected">${data.improvedText}</div>
-      `;
-
-      if (data.corrections && data.corrections.length > 0) {
-        html += `
-          <h3 class="section-title">Issues Found (${data.corrections.length})</h3>
-        `;
-        
-        data.corrections.forEach((correction, index) => {
-          html += `
-            <div class="error-item">
-              <div class="error-type">
-                <span>${correction.type.toUpperCase()}</span>
-              </div>
-              <p>${correction.issue}</p>
-              
-              <div class="error-correction">
-                <span class="incorrect">✖ ${correction.incorrect}</span>
-                <span>→</span>
-                <span class="correct">✔ ${correction.correct}</span>
-              </div>
-              
-              <p class="error-reason">${correction.explanation}</p>
-              
-              ${index < data.corrections.length - 1 ? '<hr class="divider">' : ''}
-            </div>
-          `;
-        });
-      } else {
-        html += `
-          <div class="status-message success-message">
-            No grammar errors found! Your text looks perfect. ✨
+  if (data.corrections.length > 0) {
+    html += `<h3 class="section-title">Issues Found (${data.corrections.length})</h3>`;
+    
+    data.corrections.forEach((correction, index) => {
+      const rule = grammarRules[correction.type] || {
+        title: correction.type,
+        explanation: correction.message,
+        examples: []
+      };
+      
+      html += `
+        <div class="error-item" data-severity="${correction.severity || 2}">
+          <div class="error-header">
+            <span class="error-type">${rule.title}</span>
+            <button class="explain-btn" onclick="toggleExplanation('explanation-${index}')">
+              Why is this wrong?
+            </button>
           </div>
-        `;
-      }
+          
+          <div class="error-correction">
+            <span class="incorrect">✖ ${correction.incorrect}</span>
+            <span>→</span>
+            <span class="correct">✔ ${correction.correct}</span>
+          </div>
+          
+          <div class="explanation-box" 
+         id="explanation-${index}"
+         style="background: ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)'}">
+            <p>${rule.explanation}</p>
+            ${rule.examples.length ? `
+              <div class="examples">
+                <strong>Examples:</strong>
+                <ul>${rule.examples.map(ex => `<li>${ex}</li>`).join('')}</ul>
+              </div>
+            ` : ''}
+          </div>
+          
+          ${index < data.corrections.length - 1 ? '<hr class="divider">' : ''}
+        </div>
+      `;
+    });
+  } else {
+    html += `
+      <div class="status-message success-message">
+        No grammar errors found! Your text looks perfect. ✨
+      </div>
+    `;
+  }
 
-      html += `</div>`; // Close results-card
-      resultDiv.innerHTML = html;
-    }
+  html += `</div>`; // Close results-card
+  resultDiv.innerHTML = html;
+}
+
+// Helper functions
+function highlightText(text, corrections) {
+  let result = text;
+  corrections.forEach(c => {
+    const severity = c.severity || 2;
+    result = result.replace(
+      c.context.text, 
+      `<span class="highlighted-sentence highlight-${severity}">${c.context.text}</span>`
+    );
+  });
+  return result;
+}
+
+function toggleExplanation(id) {
+  const box = document.getElementById(id);
+  box.style.display = box.style.display === 'block' ? 'none' : 'block';
+}
 
     // Helper function to show status messages
     function showMessage(message, type = 'info') {
