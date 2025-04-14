@@ -429,9 +429,38 @@ body.dark-mode .examples {
   border-radius: 3px;
   transition: all 0.2s;
 }
-.highlight-1 { background-color: #FFF3CD; }
-.highlight-2 { background-color: #FFE082; }
-.highlight-3 { background-color: #FFAB91; }
+/* Replace your existing highlight classes with: */
+.highlight-1 { 
+  background-color: #FFF3CD; 
+  color: inherit;
+}
+.highlight-2 { 
+  background-color: #FFE082; 
+  color: inherit;
+}
+.highlight-3 { 
+  background-color: #FFAB91; 
+  color: inherit;
+}
+
+body.dark-mode .highlight-1 { 
+  background-color: #332900;
+  color: #f8f9fa;
+}
+body.dark-mode .highlight-2 { 
+  background-color: #664d00;
+  color: #f8f9fa;
+}
+body.dark-mode .highlight-3 { 
+  background-color: #662200;
+  color: #f8f9fa;
+}.examples ul {
+  margin-top: 8px;
+  padding-left: 20px;
+}
+body.dark-mode .examples ul {
+  color: #e0e0e0;
+}
 
 /* Dark Mode Adjustments */
 body.dark-mode .explanation-box {
