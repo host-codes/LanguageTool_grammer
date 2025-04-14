@@ -6,13 +6,7 @@
   <title>Advanced Grammar Checker</title>
   <style>
     /* CSS Embedded */
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
+
     textarea {
       width: 100%;
       height: 150px;
@@ -38,9 +32,296 @@
   margin: 10px 0;
   border-left: 3px solid #ffa000;
 }
+  <style>
+
+<style>
+    :root {
+  /* Light Mode Colors */
+  --bg-light: #f8f9fa;
+  --text-light: #212529;
+  --primary-light: #4e73df;
+  --card-light: #ffffff;
+  --border-light: #e0e0e0;
+  
+  /* Dark Mode Colors */
+  --bg-dark: #1a1a2e;
+  --text-dark: #e6e6e6;
+  --primary-dark: #6c63ff;
+  --card-dark: #16213e;
+  --border-dark: #2d3748;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-light);
+  color: var(--text-light);
+  transition: all 0.3s ease;
+}
+
+body.dark-mode {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  color: var(--primary-light);
+  font-weight: 700;
+  margin: 0;
+  font-size: 2rem;
+}
+
+body.dark-mode h1 {
+  color: var(--primary-dark);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-light);
+}
+
+input:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+body.dark-mode input:checked + .slider {
+  background-color: var(--primary-dark);
+}
+
+/* Text Area */
+.text-area {
+  width: 100%;
+  min-height: 150px;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: all 0.3s ease;
+  background-color: var(--card-light);
+  color: var(--text-light);
+}
+
+body.dark-mode .text-area {
+  border-color: var(--border-dark);
+  background-color: var(--card-dark);
+  color: var(--text-dark);
+}
+
+.text-area:focus {
+  outline: none;
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.2);
+}
+
+body.dark-mode .text-area:focus {
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.3);
+}
+
+/* Button */
+.check-button {
+  background-color: var(--primary-light);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+body.dark-mode .check-button {
+  background-color: var(--primary-dark);
+}
+
+.check-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.check-button:active {
+  transform: translateY(0);
+}
+
+/* Results Card */
+.results-card {
+  background-color: var(--card-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .results-card {
+  background-color: var(--card-dark);
+  border-color: var(--border-dark);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.results-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary-light);
+}
+
+body.dark-mode .results-title {
+  color: var(--primary-dark);
+}
+
+/* Error Highlighting */
+.original-text, .improved-text {
+  white-space: pre-wrap;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.02);
+  margin-bottom: 1rem;
+}
+
+body.dark-mode .original-text,
+body.dark-mode .improved-text {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.error-item {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.05);
+  border-radius: 0 4px 4px 0;
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .error-item {
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+.error-type {
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-bottom: 0.5rem;
+}
+
+.error-correction {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.incorrect {
+  color: #ff6b6b;
+  text-decoration: line-through;
+}
+
+.correct {
+  color: #51cf66;
+  font-weight: 600;
+}
+
+.error-reason {
+  font-style: italic;
+  color: #868e96;
+}
+
+body.dark-mode .error-reason {
+  color: #adb5bd;
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
   </style>
 </head>
-<body>
+<body><div class="header">
+  <h1>Advanced Grammar Checker</h1>
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <span id="theme-text">Dark Mode</span>
+    <label class="toggle-switch">
+      <input type="checkbox">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
   <h1>Advanced Grammar Checker</h1>
   <textarea id="textInput" placeholder="Paste your text here..."></textarea>
   <button onclick="checkGrammar()">Check Grammar</button>
